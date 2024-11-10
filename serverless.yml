@@ -18,7 +18,7 @@ provider:
     TABLE2_NAME: ${env:TABLE2_NAME}
 
 functions:
-  scrape_table:
+  scrappingReddit:
     handler: scrapping.lambda_handler  
     package:
       include:
