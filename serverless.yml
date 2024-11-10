@@ -14,8 +14,8 @@ provider:
     USER_AGENT: ${env:USER_AGENT}
     USERNAME: ${env:USERNAME}
     PASSWORD: ${env:PASSWORD}
-    TABLE_NAME: redditPosts
-    TABLE_NAME2: redditComments
+    TABLE_NAME: ${env:TABLE_NAME}
+    TABLE_NAME2: ${env:TABLE_NAME2}
 
 functions:
   scrappingReddit:
@@ -47,7 +47,7 @@ resources:
     TableCommentsReddit:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.TABLE2_NAME}
+        TableName: ${self:provider.environment.TABLE_NAME2}
         AttributeDefinitions:
           - AttributeName: post_id
             AttributeType: S
