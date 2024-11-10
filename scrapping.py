@@ -2,13 +2,13 @@ import praw
 import json
 import os
 import boto3
-
+from boto3.dynamodb.types import Decimal  # Import Decimal for conversion
 
 
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
     posts_table = dynamodb.Table(os.environ['TABLE_NAME'])
-    comments_table = dynamodb.Table(os.environ['TABLE_NAME2'])
+    comments_table = dynamodb.Table(os.environ['TABLE2_NAME'])
 
     reddit = praw.Reddit(
         client_id=os.environ['CLIENT_ID'], 
@@ -31,7 +31,7 @@ def lambda_handler(event, context):
         print(f"Authentication error: {e}")
         return {
             'statusCode': 500,
-            'body': json.dumps({"error": "Authentication failed"})
+            'body': {"error": "Authentication failed"}
         }
 
     try:
@@ -42,12 +42,12 @@ def lambda_handler(event, context):
 
             post_data = {
                 "title": post.title,
-                "upvotes": post.score,
+                "upvotes": Decimal(post.score),  
                 "num_comments": post.num_comments,
                 "post_id": post.id,
                 "url": post.url,
-                "created_utc": post.created_utc,
-                "total_comments":total_comments
+                "created_utc": Decimal(post.created_utc),  
+                "total_comments": total_comments
             }
             posts_table.put_item(Item=post_data)
 
@@ -60,8 +60,8 @@ def lambda_handler(event, context):
                     "comment_id": comment.id,
                     "comment_body": comment.body,
                     "comment_author": comment.author.name if comment.author else "deleted",
-                    "comment_upvotes": comment.score,
-                    "comment_created_utc": comment.created_utc
+                    "comment_upvotes": Decimal(comment.score),  
+                    "comment_created_utc": Decimal(comment.created_utc)  
                 }
                 comments_table.put_item(Item=comment_data)  
                 post_data_with_comments["comments"].append(comment_data) 
