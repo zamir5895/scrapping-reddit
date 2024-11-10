@@ -5,13 +5,12 @@ import boto3
 from boto3.dynamodb.types import Decimal
 
 def decimal_to_float(obj):
-    """Convert all decimal.Decimal instances to float or int in a nested dictionary or list."""
     if isinstance(obj, list):
         return [decimal_to_float(i) for i in obj]
     elif isinstance(obj, dict):
         return {k: decimal_to_float(v) for k, v in obj.items()}
     elif isinstance(obj, Decimal):
-        return float(obj) if obj % 1 else int(obj)  # Convert to float if decimal, or int if whole number
+        return float(obj) if obj % 1 else int(obj)  
     return obj
 
 def lambda_handler(event, context):
@@ -35,12 +34,12 @@ def lambda_handler(event, context):
     posts_list = []
 
     try:
-        print(f"Authentication successful: User {reddit.user.me()}")
+        print(f"Autentificacion con exito: User {reddit.user.me()}")
     except Exception as e:
-        print(f"Authentication error: {e}")
+        print(f"Fallo autentificacion: {e}")
         return {
             'statusCode': 500,
-            'body': {"error": "Authentication failed"}
+            'body': {"error": "Fallo autentificacion"}
         }
 
     try:
@@ -77,7 +76,6 @@ def lambda_handler(event, context):
 
             posts_list.append(post_data_with_comments)
 
-        # Convert Decimal to JSON serializable format for the response
         response_body = decimal_to_float(posts_list)
 
         return {
@@ -86,7 +84,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
-        print(f"Error fetching posts or comments: {e}")
+        print(f"Errr en el scrapeo: {e}")
         return {
             'statusCode': 500,
             'body': {"error": str(e)},
