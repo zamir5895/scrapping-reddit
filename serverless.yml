@@ -15,7 +15,7 @@ provider:
     USERNAME: ${env:USERNAME}
     PASSWORD: ${env:PASSWORD}
     TABLE_NAME: ${env:TABLE_NAME}
-    TABLE2_NAME: ${env:TABLE2_NAME}
+    TABLE_NAME2: ${env:TABLE_NAME2}
 
 functions:
   scrappingReddit:
