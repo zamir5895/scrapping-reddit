@@ -8,7 +8,7 @@ import boto3
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
     posts_table = dynamodb.Table(os.environ['TABLE_NAME'])
-    comments_table = dynamodb.Table(os.environ['TABLE2_NAME'])
+    comments_table = dynamodb.Table(os.environ['TABLE_NAME2'])
 
     reddit = praw.Reddit(
         client_id=os.environ['CLIENT_ID'], 
