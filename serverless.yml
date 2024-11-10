@@ -14,8 +14,8 @@ provider:
     USER_AGENT: ${env:USER_AGENT}
     USERNAME: ${env:USERNAME}
     PASSWORD: ${env:PASSWORD}
-    TABLE_NAME: ${env:TABLE_NAME}
-    TABLE_NAME2: ${env:TABLE_NAME2}
+    TABLE_NAME: redditPosts
+    TABLE_NAME2: redditComments
 
 functions:
   scrappingReddit:
