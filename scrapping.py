@@ -2,13 +2,22 @@ import praw
 import json
 import os
 import boto3
-from boto3.dynamodb.types import Decimal  # Import Decimal for conversion
+from boto3.dynamodb.types import Decimal
 
+def decimal_to_float(obj):
+    """Convert all decimal.Decimal instances to float or int in a nested dictionary or list."""
+    if isinstance(obj, list):
+        return [decimal_to_float(i) for i in obj]
+    elif isinstance(obj, dict):
+        return {k: decimal_to_float(v) for k, v in obj.items()}
+    elif isinstance(obj, Decimal):
+        return float(obj) if obj % 1 else int(obj)  # Convert to float if decimal, or int if whole number
+    return obj
 
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
     posts_table = dynamodb.Table(os.environ['TABLE_NAME'])
-    comments_table = dynamodb.Table(os.environ['TABLE_NAME2'])
+    comments_table = dynamodb.Table(os.environ['TABLE2_NAME'])
 
     reddit = praw.Reddit(
         client_id=os.environ['CLIENT_ID'], 
@@ -38,7 +47,7 @@ def lambda_handler(event, context):
         subreddit = reddit.subreddit(topic)
         for post in subreddit.hot(limit=max_posts):
             post.comments.replace_more(limit=0)
-            total_comments = len(post.comments.list())
+            total_comments = Decimal(len(post.comments.list()))
 
             post_data = {
                 "title": post.title,
@@ -67,11 +76,13 @@ def lambda_handler(event, context):
                 post_data_with_comments["comments"].append(comment_data) 
 
             posts_list.append(post_data_with_comments)
-            print("Single post data with comments:", json.dumps(post_data_with_comments, indent=4))
+
+        # Convert Decimal to JSON serializable format for the response
+        response_body = decimal_to_float(posts_list)
 
         return {
             'statusCode': 200,
-            'body': posts_list,
+            'body': response_body,
         }
 
     except Exception as e:
