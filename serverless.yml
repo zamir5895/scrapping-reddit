@@ -1,0 +1,61 @@
+org: zamcloud
+service: api-web-scraping-reddit
+
+provider:
+  name: aws
+  runtime: python3.12
+  memorySize: 1024
+  timeout: 30
+  iam:
+    role: arn:aws:iam::418515024637:role/LabRole
+  environment:
+    CLIENT_ID: ${env:CLIENT_ID}
+    CLIENT_SECRET: ${env:CLIENT_SECRET}
+    USER_AGENT: ${env:USER_AGENT}
+    USERNAME: ${env:USERNAME}
+    PASSWORD: ${env:PASSWORD}
+    TABLE_NAME: ${env:TABLE_NAME}
+    TABLE2_NAME: ${env:TABLE2_NAME}
+
+functions:
+  scrape_table:
+    handler: scrapping.lambda_handler  
+    package:
+      include:
+        - ./**  
+    events:
+      - http:
+          path: /scrape/table
+          method: get
+          cors: true
+          integration: lambda
+
+resources:
+  Resources:
+    TablePostsReddit:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: post_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: post_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    TableCommentsReddit:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE2_NAME}
+        AttributeDefinitions:
+          - AttributeName: post_id
+            AttributeType: S
+          - AttributeName: comment_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: post_id
+            KeyType: HASH
+          - AttributeName: comment_id
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
